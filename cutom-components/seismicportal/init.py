@@ -1,6 +1,11 @@
+from homeassistant.core import HomeAssistant
+from homeassistant.config_entries import ConfigEntry
+
+from .const import DOMAIN
 from .websocket_client import SeismicListener
 
-async def async_setup_entry(hass, entry):
+
+async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
 
     config = entry.data
 
