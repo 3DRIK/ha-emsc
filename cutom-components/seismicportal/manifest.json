@@ -1,0 +1,11 @@
+{
+  "domain": "seismicportal",
+  "name": "Seismic Portal",
+  "version": "1.0.0",
+  "documentation": "https://github.com/3DRIK/ha-emsc",
+  "requirements": [],
+  "dependencies": [],
+  "codeowners": ["3DRIK"],
+  "config_flow": true,
+  "iot_class": "cloud_push"
+}
