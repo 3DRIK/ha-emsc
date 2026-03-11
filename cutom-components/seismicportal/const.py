@@ -6,3 +6,5 @@ CONF_RADIUS = "radius"
 CONF_MAG = "min_magnitude"
 
 WS_URL = "wss://www.seismicportal.eu/standing_order/websocket"
+
+EVENT_EARTHQUAKE = "seismicportal_earthquake"
