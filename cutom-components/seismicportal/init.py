@@ -1,18 +1,17 @@
-from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from .websocket_client import SeismicListener
 
-from .const import DOMAIN
-from .coordinator import SeismicCoordinator
+async def async_setup_entry(hass, entry):
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
+    config = entry.data
 
-    coordinator = SeismicCoordinator(hass, entry.data)
+    listener = SeismicListener(
+        hass,
+        config["latitude"],
+        config["longitude"],
+        config["radius"],
+        config["min_magnitude"]
+    )
 
-    await coordinator.async_start()
-
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = coordinator
-
-    await hass.config_entries.async_forward_entry_setups(entry, ["sensor"])
+    hass.loop.create_task(listener.start())
 
     return True
