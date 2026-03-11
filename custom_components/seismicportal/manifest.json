@@ -1,7 +1,7 @@
 {
   "domain": "seismicportal",
   "name": "Seismic Portal",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "documentation": "https://github.com/3DRIK/ha-emsc",
   "requirements": [],
   "dependencies": [],
