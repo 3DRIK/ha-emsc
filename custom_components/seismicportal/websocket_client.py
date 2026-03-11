@@ -2,6 +2,7 @@ import asyncio
 import json
 import math
 import logging
+import ssl
 import websockets
 
 from .const import WS_URL, EVENT_EARTHQUAKE
@@ -18,7 +19,6 @@ class SeismicListener:
         self.center_lon = lon
         self.radius_km = radius_km
         self.min_mag = min_magnitude
-
         self.seen_ids = set()
 
     def distance_km(self, lat1, lon1, lat2, lon2):
@@ -26,7 +26,6 @@ class SeismicListener:
         r = 6371  # Earth radius in km
         dlat = math.radians(lat2 - lat1)
         dlon = math.radians(lon2 - lon1)
-
         a = (
             math.sin(dlat / 2) ** 2
             + math.cos(math.radians(lat1))
@@ -40,19 +39,27 @@ class SeismicListener:
         """Start listening to the websocket in an infinite loop."""
         while True:
             try:
-                async with websockets.connect(WS_URL) as ws:
+                # SSL context, ssl=False to ignore certificate verification
+                ssl_context = ssl.create_default_context()
+                ssl_context.check_hostname = False
+                ssl_context.verify_mode = ssl.CERT_NONE
+
+                # non-blocking websocket connect
+                async with websockets.connect(WS_URL, ssl=ssl_context) as ws:
                     _LOGGER.info("Connected to SeismicPortal websocket")
 
                     while True:
-                        msg = await ws.recv()
-                        data = json.loads(msg)
+                        try:
+                            msg = await ws.recv()
+                        except websockets.ConnectionClosed:
+                            _LOGGER.warning("Websocket connection closed, reconnecting...")
+                            break
 
+                        data = json.loads(msg)
                         if "data" not in data:
                             continue
 
                         event = data["data"]
-
-                        # unikátny ID zemetrasenia
                         props = event["properties"]
                         event_id = props["unid"]
 
@@ -89,4 +96,6 @@ class SeismicListener:
 
             except Exception as e:
                 _LOGGER.error("Websocket error: %s", e)
-                await asyncio.sleep(10)  # reconnect po 10s
+
+            # reconnect po 10s
+            await asyncio.sleep(10)
